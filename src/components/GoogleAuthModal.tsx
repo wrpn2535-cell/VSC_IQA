@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserProfile, UserRole } from '../types';
-import { LogIn, Search, CheckCircle, Shield, Building2, Mail, UserCheck, AlertCircle, ArrowLeft, Clock } from 'lucide-react';
+import { LogIn, Search, CheckCircle, Shield, Building2, Mail, UserCheck, AlertCircle, ArrowLeft, Clock, Zap } from 'lucide-react';
+import { ApiService } from '../services/api';
 
 interface GoogleAuthModalProps {
   isOpen: boolean;
@@ -27,6 +28,24 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
 
   // Confirmation step state
   const [pendingUser, setPendingUser] = useState<UserProfile | null>(null);
+  const [isLoggingInGoogle, setIsLoggingInGoogle] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+
+  const handleDirectGoogleLogin = async () => {
+    setIsLoggingInGoogle(true);
+    setGoogleError(null);
+    try {
+      const profile = await ApiService.loginWithFirebaseGoogle();
+      onSelectUser(profile);
+      onClose();
+    } catch (err: any) {
+      console.error('Google popup sign-in error:', err);
+      // If user cancelled popup or error occurred
+      setGoogleError(err.message || 'ไม่สามารถเปิดหน้าต่าง Google Login ได้');
+    } finally {
+      setIsLoggingInGoogle(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -215,8 +234,71 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
           </div>
         ) : (
           <>
+            {/* Real Firebase Google Authentication One-Click Button */}
+            <div className="p-4 mx-5 mt-4 rounded-xl bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-800 dark:via-indigo-950/40 dark:to-slate-850 border border-indigo-200 dark:border-indigo-800 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-xs">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span>เข้าสู่ระบบด้วย Google Account จริง (Firebase Auth)</span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-1.5 py-0.2 rounded font-mono font-bold">
+                      Live
+                    </span>
+                  </h4>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                    เข้าสู่ระบบด้วยอีเมล Google และบันทึกข้อมูลเรียลไทม์ลง Firebase Firestore
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleDirectGoogleLogin}
+                disabled={isLoggingInGoogle}
+                className="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-50 transition-all shrink-0"
+              >
+                {isLoggingInGoogle ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>กำลังเปิด Popup...</span>
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>ลงชื่อเข้าใช้ด้วย Google</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {googleError && (
+              <div className="mx-5 mt-2 p-2.5 rounded-lg bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{googleError}</span>
+              </div>
+            )}
+
             {/* Tab switch */}
-            <div className="flex border-b border-slate-200 dark:border-slate-800 px-5 pt-2 gap-4">
+            <div className="flex border-b border-slate-200 dark:border-slate-800 px-5 pt-3 gap-4">
               <button
                 onClick={() => setActiveTab('roster')}
                 className={`pb-2.5 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${

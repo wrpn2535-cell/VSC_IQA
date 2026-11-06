@@ -1,5 +1,6 @@
 import { AppState, ChecklistAssessmentRecord, CapaRecord, UserRole, FormTemplateCustomizer, AnnualPlanDepartment, AuditScheduleItem, UserProfile } from '../types';
 import { INITIAL_APP_STATE } from '../data/initialData';
+import { FirebaseService } from './firebase';
 
 const STORAGE_KEY = 'vet_superior_iqa_state_v1';
 const WS_URL_STORAGE_KEY = 'vet_superior_custom_ws_url';
@@ -270,6 +271,23 @@ function initSSE() {
 initWebSocket();
 initSSE();
 
+// Start Firebase Firestore Real-Time WebSocket Synchronization (Vercel-Compatible)
+if (typeof window !== 'undefined') {
+  try {
+    FirebaseService.subscribeToAppState((firestoreData) => {
+      if (firestoreData && typeof firestoreData === 'object') {
+        const merged: AppState = {
+          ...currentState,
+          ...firestoreData,
+        };
+        notifyListeners(merged);
+      }
+    });
+  } catch (err) {
+    console.warn('[Firebase WebSocket] Realtime subscription init error:', err);
+  }
+}
+
 export const ApiService = {
   subscribe(listener: StateListener): () => void {
     listeners.add(listener);
@@ -323,11 +341,25 @@ export const ApiService = {
   },
 
   async fetchRemoteState(): Promise<AppState> {
+    // 1. Try Firebase Firestore first (handles Vercel and multi-device persistence)
+    try {
+      const fbState = await FirebaseService.getInitialState();
+      if (fbState) {
+        notifyListeners(fbState);
+        return fbState;
+      }
+    } catch (fbErr) {
+      console.warn('Could not load initial state from Firestore:', fbErr);
+    }
+
+    // 2. Try Node.js Express backend /api/state
     try {
       const res = await fetch('/api/state');
       if (res.ok) {
         const data = await res.json();
         notifyListeners(data);
+        // Also seed to Firebase if empty
+        FirebaseService.saveAppState(data).catch(() => {});
         return data;
       }
     } catch (err) {
@@ -343,10 +375,15 @@ export const ApiService = {
       broadcastChannel.postMessage({ type: 'STATE_UPDATE', state: newState });
     }
 
-    // Attempt sending over WebSocket first
+    // 1. Sync over Firebase Firestore (Google Cloud WebSocket Real-Time Channel)
+    FirebaseService.saveAppState(newState).catch((fbErr) => {
+      console.warn('[Firebase] Background state sync warning:', fbErr);
+    });
+
+    // 2. Attempt sending over custom Node.js WebSocket
     const sentWs = this.sendWsMessage({ type: 'STATE_UPDATE', state: newState });
 
-    // Also persist to backend HTTP
+    // 3. Also persist to Node.js backend HTTP /api/state
     try {
       await fetch('/api/state', {
         method: 'POST',
@@ -442,7 +479,14 @@ export const ApiService = {
     });
   },
 
+  async loginWithFirebaseGoogle(): Promise<UserProfile> {
+    const profile = await FirebaseService.loginWithGoogle();
+    await this.loginUser(profile);
+    return profile;
+  },
+
   async logoutUser(): Promise<void> {
+    FirebaseService.logout().catch(() => {});
     return this.patchState({
       isAuthenticated: false,
     });

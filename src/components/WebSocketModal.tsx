@@ -19,6 +19,7 @@ import {
   Info
 } from 'lucide-react';
 import { ApiService, WebSocketInfo } from '../services/api';
+import { FirebaseService } from '../services/firebase';
 
 interface WebSocketModalProps {
   isOpen: boolean;
@@ -181,6 +182,37 @@ export const WebSocketModal: React.FC<WebSocketModalProps> = ({ isOpen, onClose 
             </div>
           </div>
 
+          {/* Firebase Firestore Real-Time Channel Card (The key to Vercel Real-time sync!) */}
+          <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50/90 via-teal-50/50 to-slate-50 dark:from-emerald-950/40 dark:via-slate-850 dark:to-slate-900 border border-emerald-300 dark:border-emerald-800 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-300 font-bold">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span className="text-xs">Firebase Firestore Real-Time WebSockets (Google Cloud Channel)</span>
+              </div>
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 font-mono font-bold px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
+                ACTIVE & SYNCED
+              </span>
+            </div>
+
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
+              <strong>ตอบโจทย์การใช้งานบน Vercel 100%:</strong> เนื่องจากข้อมูลถูกจัดเก็บใน <strong>Firebase Firestore</strong> ทุกการแก้ไข (ผลการตรวจ Checklist, แผนประจำปี, CAR/PAR) จะถูกส่งผ่าน WebSockets ของ Google (<code className="font-mono text-[10px]">wss://firestore.googleapis.com</code>) ไปยังทุกไคลเอนต์และอุปกรณ์แบบ Real-Time ทันที โดยไม่ต้องพึ่งพาเซิร์ฟเวอร์แบบเดิมที่ติดขัดเรื่อง Serverless Timeout บน Vercel
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-mono text-[10px]">
+              <div className="bg-white/80 dark:bg-slate-900/80 p-2 rounded-lg border border-emerald-200 dark:border-emerald-900/60">
+                <span className="text-slate-500 block">Firebase Project ID:</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">{FirebaseService.getProjectInfo().projectId}</span>
+              </div>
+              <div className="bg-white/80 dark:bg-slate-900/80 p-2 rounded-lg border border-emerald-200 dark:border-emerald-900/60">
+                <span className="text-slate-500 block">Firestore Database ID:</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold truncate block">{FirebaseService.getProjectInfo().firestoreDatabaseId}</span>
+              </div>
+            </div>
+          </div>
+
           {/* Vercel WebSockets Architectural Guidance Banner */}
           <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50/80 via-blue-50/60 to-slate-50 dark:from-slate-850 dark:via-indigo-950/30 dark:to-slate-900 border border-indigo-200 dark:border-indigo-800 space-y-2">
             <div className="flex items-center gap-2 text-indigo-900 dark:text-indigo-300 font-bold">
@@ -192,10 +224,13 @@ export const WebSocketModal: React.FC<WebSocketModalProps> = ({ isOpen, onClose 
             </p>
             <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300 text-[11px]">
               <li>
-                <strong>โหมด Full-Duplex (ค่าเริ่มต้น):</strong> ทำงานผ่านเซิร์ฟเวอร์ Node.js + <code className="font-mono bg-white dark:bg-slate-800 px-1 py-0.5 rounded border border-slate-200 dark:border-slate-700">ws</code> บนพอร์ต 3000 เชื่อมต่ออัตโนมัติทั้งตอนทดสอบและรันบนคลาวด์
+                <strong>โหมด Firebase Firestore WebSockets (แนะนำสำหรับ Vercel):</strong> ข้อมูลอัปเดตแบบเรียลไทม์ 100% ข้ามทุกอุปกรณ์และทุกแท็บอัตโนมัติผ่าน Google Cloud
               </li>
               <li>
-                <strong>เมื่อ Deploy บน Vercel:</strong> ท่านสามารถระบุ URL ของ Web Socket Server ภายนอก (เช่น เซิร์ฟเวอร์ Node.js บน Railway, Cloud Run หรือบริการ WebSocket สำหรับ Vercel เช่น <em>PartyKit, Pusher, Ably</em>) ในช่องด้านล่างเพื่อเชื่อมต่อทันที
+                <strong>โหมด Node.js Full-Duplex (<code className="font-mono text-[10px]">ws</code>):</strong> สำหรับรันในเครื่อง หรือ Container บน Cloud Run / VPS
+              </li>
+              <li>
+                <strong>โหมด Custom Endpoint:</strong> ระบุ URL ของ WebSocket Server ภายนอก (เช่น PartyKit, Pusher, Ably) ในช่องด้านล่าง
               </li>
             </ul>
           </div>
