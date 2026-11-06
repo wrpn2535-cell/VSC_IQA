@@ -2,10 +2,26 @@ import { AppState, ChecklistAssessmentRecord, CapaRecord, UserRole, FormTemplate
 import { INITIAL_APP_STATE } from '../data/initialData';
 
 const STORAGE_KEY = 'vet_superior_iqa_state_v1';
+const WS_URL_STORAGE_KEY = 'vet_superior_custom_ws_url';
 const broadcastChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('vet_superior_iqa_sync') : null;
 
 type StateListener = (state: AppState) => void;
 const listeners: Set<StateListener> = new Set();
+
+export type WebSocketConnectionStatus = 'CONNECTING' | 'CONNECTED' | 'DISCONNECTED' | 'ERROR';
+
+export interface WebSocketInfo {
+  status: WebSocketConnectionStatus;
+  url: string;
+  isCustomUrl: boolean;
+  connectedClients: number;
+  latencyMs?: number;
+  lastPingTime?: string;
+  reconnectAttempts: number;
+}
+
+type WsStatusListener = (info: WebSocketInfo) => void;
+const wsListeners: Set<WsStatusListener> = new Set();
 
 let currentState: AppState = (() => {
   try {
@@ -44,7 +60,191 @@ if (broadcastChannel) {
   };
 }
 
-// Setup Server-Sent Events (SSE) for centralized multi-user real-time sync
+// =========================================================================
+// WEBSOCKET CLIENT IMPLEMENTATION (Vercel & Full-Duplex Real-Time Sync)
+// =========================================================================
+let activeWs: WebSocket | null = null;
+let reconnectTimer: any = null;
+let pingIntervalTimer: any = null;
+let pingStartTime = 0;
+let reconnectCount = 0;
+
+let currentWsInfo: WebSocketInfo = {
+  status: 'DISCONNECTED',
+  url: '',
+  isCustomUrl: false,
+  connectedClients: 1,
+  reconnectAttempts: 0,
+};
+
+function notifyWsListeners() {
+  wsListeners.forEach((listener) => {
+    try {
+      listener({ ...currentWsInfo });
+    } catch (err) {
+      console.error('Error notifying ws listener', err);
+    }
+  });
+}
+
+function resolveWsUrl(): { url: string; isCustom: boolean } {
+  if (typeof window === 'undefined') return { url: '', isCustom: false };
+
+  const customUrl = localStorage.getItem(WS_URL_STORAGE_KEY);
+  if (customUrl && customUrl.trim()) {
+    return { url: customUrl.trim(), isCustom: true };
+  }
+
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const defaultUrl = `${protocol}//${window.location.host}/ws`;
+  return { url: defaultUrl, isCustom: false };
+}
+
+function initWebSocket() {
+  if (typeof window === 'undefined' || typeof WebSocket === 'undefined') return;
+
+  if (activeWs) {
+    try {
+      activeWs.close();
+    } catch (e) {
+      // Ignore
+    }
+    activeWs = null;
+  }
+
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+
+  if (pingIntervalTimer) {
+    clearInterval(pingIntervalTimer);
+    pingIntervalTimer = null;
+  }
+
+  const { url, isCustom } = resolveWsUrl();
+  currentWsInfo = {
+    ...currentWsInfo,
+    status: 'CONNECTING',
+    url,
+    isCustomUrl: isCustom,
+    reconnectAttempts: reconnectCount,
+  };
+  notifyWsListeners();
+
+  try {
+    const ws = new WebSocket(url);
+    activeWs = ws;
+
+    ws.onopen = () => {
+      console.log(`[WebSocket Client] Connected to ${url}`);
+      reconnectCount = 0;
+      currentWsInfo = {
+        ...currentWsInfo,
+        status: 'CONNECTED',
+        reconnectAttempts: 0,
+      };
+      notifyWsListeners();
+
+      // Announce current user presence if authenticated
+      if (currentState.currentUser && currentState.isAuthenticated) {
+        ws.send(
+          JSON.stringify({
+            type: 'USER_JOIN',
+            userId: currentState.currentUser.id,
+            userName: currentState.currentUser.name,
+          })
+        );
+      }
+
+      // Start periodic ping for latency measurement
+      pingIntervalTimer = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          pingStartTime = Date.now();
+          ws.send(JSON.stringify({ type: 'PING' }));
+        }
+      }, 15000);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'PONG') {
+          if (pingStartTime > 0) {
+            const latency = Date.now() - pingStartTime;
+            currentWsInfo = {
+              ...currentWsInfo,
+              latencyMs: latency,
+              lastPingTime: new Date().toLocaleTimeString('th-TH'),
+            };
+            notifyWsListeners();
+          }
+        } else if (data.type === 'STATE_UPDATE' && data.state) {
+          notifyListeners(data.state);
+        } else if (data.type === 'CLIENT_COUNT' && typeof data.count === 'number') {
+          currentWsInfo = {
+            ...currentWsInfo,
+            connectedClients: data.count,
+          };
+          notifyWsListeners();
+        } else if (data.type === 'WS_CONNECTED') {
+          if (typeof data.clientCount === 'number') {
+            currentWsInfo = {
+              ...currentWsInfo,
+              connectedClients: data.clientCount,
+            };
+            notifyWsListeners();
+          }
+          if (data.state) {
+            notifyListeners(data.state);
+          }
+        }
+      } catch (err) {
+        console.warn('[WebSocket Client] Failed to parse message', err);
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.warn('[WebSocket Client] Error event received', err);
+      currentWsInfo = {
+        ...currentWsInfo,
+        status: 'ERROR',
+      };
+      notifyWsListeners();
+    };
+
+    ws.onclose = () => {
+      console.log('[WebSocket Client] Connection closed. Will schedule reconnect.');
+      currentWsInfo = {
+        ...currentWsInfo,
+        status: 'DISCONNECTED',
+      };
+      notifyWsListeners();
+
+      if (pingIntervalTimer) {
+        clearInterval(pingIntervalTimer);
+        pingIntervalTimer = null;
+      }
+
+      // Schedule reconnect with backoff
+      reconnectCount++;
+      const delay = Math.min(1000 * Math.pow(1.5, reconnectCount), 10000);
+      reconnectTimer = setTimeout(() => {
+        initWebSocket();
+      }, delay);
+    };
+  } catch (err) {
+    console.warn('[WebSocket Client] Failed to initialize WebSocket:', err);
+    currentWsInfo = {
+      ...currentWsInfo,
+      status: 'ERROR',
+    };
+    notifyWsListeners();
+  }
+}
+
+// Fallback Server-Sent Events (SSE)
 function initSSE() {
   if (typeof window === 'undefined' || typeof EventSource === 'undefined') return;
 
@@ -61,26 +261,61 @@ function initSSE() {
         console.warn('Failed to parse SSE event data', err);
       }
     };
-
-    eventSource.onerror = () => {
-      // Reconnect handled automatically by EventSource
-    };
   } catch (err) {
-    console.warn('SSE not supported or failed to connect', err);
+    console.warn('SSE fallback error', err);
   }
 }
 
-// Auto init SSE
+// Start WebSocket & SSE
+initWebSocket();
 initSSE();
 
 export const ApiService = {
   subscribe(listener: StateListener): () => void {
     listeners.add(listener);
-    // Call immediately with current state
     listener(currentState);
     return () => {
       listeners.delete(listener);
     };
+  },
+
+  subscribeWs(listener: WsStatusListener): () => void {
+    wsListeners.add(listener);
+    listener({ ...currentWsInfo });
+    return () => {
+      wsListeners.delete(listener);
+    };
+  },
+
+  getWsInfo(): WebSocketInfo {
+    return { ...currentWsInfo };
+  },
+
+  setCustomWsUrl(customUrl: string | null): void {
+    if (customUrl && customUrl.trim()) {
+      localStorage.setItem(WS_URL_STORAGE_KEY, customUrl.trim());
+    } else {
+      localStorage.removeItem(WS_URL_STORAGE_KEY);
+    }
+    reconnectCount = 0;
+    initWebSocket();
+  },
+
+  reconnectWs(): void {
+    reconnectCount = 0;
+    initWebSocket();
+  },
+
+  sendWsMessage(message: any): boolean {
+    if (activeWs && activeWs.readyState === WebSocket.OPEN) {
+      try {
+        activeWs.send(JSON.stringify(message));
+        return true;
+      } catch (e) {
+        console.error('Failed to send WebSocket message', e);
+      }
+    }
+    return false;
   },
 
   getCurrentState(): AppState {
@@ -108,6 +343,10 @@ export const ApiService = {
       broadcastChannel.postMessage({ type: 'STATE_UPDATE', state: newState });
     }
 
+    // Attempt sending over WebSocket first
+    const sentWs = this.sendWsMessage({ type: 'STATE_UPDATE', state: newState });
+
+    // Also persist to backend HTTP
     try {
       await fetch('/api/state', {
         method: 'POST',
@@ -115,7 +354,9 @@ export const ApiService = {
         body: JSON.stringify(newState),
       });
     } catch (err) {
-      console.warn('Could not persist to server /api/state', err);
+      if (!sentWs) {
+        console.warn('Could not persist to server /api/state', err);
+      }
     }
   },
 
@@ -189,6 +430,11 @@ export const ApiService = {
 
   async loginUser(user: UserProfile): Promise<void> {
     const nowStr = new Date().toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
+    this.sendWsMessage({
+      type: 'USER_JOIN',
+      userId: user.id,
+      userName: user.name,
+    });
     return this.patchState({
       currentUser: user,
       isAuthenticated: true,
@@ -235,7 +481,6 @@ export const ApiService = {
       newAssessments.push(record);
     }
 
-    // Auto-generate CAPAs for any items marked NC_MAJOR, NC_MINOR, or OBS if not already linked
     let newCapas = [...currentState.capas];
     let capaCounter = newCapas.length + 1;
 
@@ -267,7 +512,7 @@ export const ApiService = {
           containment: '',
           correctiveAction: '',
           assignedAuditee: record.auditeeName,
-          dueDate: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0], // 14 days later
+          dueDate: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
           leadAuditor: record.auditorName,
           qmrName: 'คุณชวิน พาพิทักษ์',
           status: 'OPEN',

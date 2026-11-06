@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { Printer, Bell, Search, Shield, RefreshCw, CheckCircle2, AlertTriangle, Clock, LogOut, ShieldAlert } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Printer, Bell, Search, Shield, RefreshCw, CheckCircle2, AlertTriangle, Clock, LogOut, ShieldAlert, Radio, Wifi } from 'lucide-react';
 import { AppState, UserProfile, AppNotification } from '../types';
 import { NavTab } from './Sidebar';
+import { ApiService, WebSocketInfo } from '../services/api';
+import { WebSocketModal } from './WebSocketModal';
 
 interface HeaderProps {
   activeTab: NavTab;
@@ -29,6 +31,17 @@ export const Header: React.FC<HeaderProps> = ({
   const [showPrintMenu, setShowPrintMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showWsModal, setShowWsModal] = useState(false);
+  const [wsInfo, setWsInfo] = useState<WebSocketInfo>(ApiService.getWsInfo());
+
+  useEffect(() => {
+    const unsubscribe = ApiService.subscribeWs((info) => {
+      setWsInfo(info);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const tabTitles: Record<NavTab, { title: string; subtitle: string }> = {
     'dashboard': { title: 'แดชบอร์ดภาพรวมการตรวจติดตามคุณภาพภายใน', subtitle: 'Compliance KPIs & 6-Cause Analysis' },
@@ -99,7 +112,44 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Zone 3: Actions & Notifications & Google User Profile */}
-      <div className="flex items-center gap-2.5 shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Web Socket & Vercel Connection Status Indicator */}
+        <button
+          type="button"
+          onClick={() => setShowWsModal(true)}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold rounded-lg border transition-all cursor-pointer shadow-2xs ${
+            wsInfo.status === 'CONNECTED'
+              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100'
+              : wsInfo.status === 'CONNECTING'
+              ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800 hover:bg-amber-100'
+              : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-300 dark:border-red-800 hover:bg-red-100'
+          }`}
+          title="สถานะและการตั้งค่า Web Socket / Vercel"
+        >
+          <span className="relative flex h-2 w-2">
+            {wsInfo.status === 'CONNECTED' && (
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            )}
+            <span
+              className={`relative inline-flex rounded-full h-2 w-2 ${
+                wsInfo.status === 'CONNECTED'
+                  ? 'bg-emerald-500'
+                  : wsInfo.status === 'CONNECTING'
+                  ? 'bg-amber-500'
+                  : 'bg-red-500'
+              }`}
+            ></span>
+          </span>
+          <span className="hidden sm:inline">
+            WS: {wsInfo.status === 'CONNECTED' ? 'Live' : wsInfo.status === 'CONNECTING' ? 'Connecting' : 'Offline'}
+          </span>
+          {wsInfo.status === 'CONNECTED' && wsInfo.latencyMs !== undefined && (
+            <span className="text-[10px] opacity-75 font-normal hidden md:inline">
+              {wsInfo.latencyMs}ms
+            </span>
+          )}
+        </button>
+
         {/* Sync button */}
         <button
           onClick={onRefreshSync}
@@ -304,6 +354,8 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       )}
+      {/* WebSocket & Vercel Connection Configuration Modal */}
+      <WebSocketModal isOpen={showWsModal} onClose={() => setShowWsModal(false)} />
     </header>
   );
 };

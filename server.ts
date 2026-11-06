@@ -1,4 +1,6 @@
 import express, { Request, Response } from 'express';
+import http from 'http';
+import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import fs from 'fs';
 import path from 'path';
@@ -43,10 +45,10 @@ if (!fs.existsSync(DB_FILE)) {
   persistState();
 }
 
-// SSE Connected Clients
+// SSE Connected Clients (fallback)
 const sseClients: Response[] = [];
 
-function broadcastStateUpdate(updatedState: AppState) {
+function broadcastSseStateUpdate(updatedState: AppState) {
   const data = JSON.stringify({ type: 'STATE_UPDATE', state: updatedState });
   sseClients.forEach((client) => {
     client.write(`data: ${data}\n\n`);
@@ -55,11 +57,145 @@ function broadcastStateUpdate(updatedState: AppState) {
 
 async function startServer() {
   const app = express();
+  const server = http.createServer(app);
   const PORT = process.env.PORT || 3000;
+
+  // Initialize WebSocket Server on /ws path
+  const wss = new WebSocketServer({ server, path: '/ws' });
+
+  interface ExtWebSocket extends WebSocket {
+    isAlive?: boolean;
+    userId?: string;
+    userName?: string;
+  }
+
+  function broadcastWsStateUpdate(updatedState: AppState, senderWs?: WebSocket) {
+    const payload = JSON.stringify({
+      type: 'STATE_UPDATE',
+      state: updatedState,
+      timestamp: new Date().toISOString()
+    });
+    wss.clients.forEach((client) => {
+      if (client !== senderWs && client.readyState === WebSocket.OPEN) {
+        client.send(payload);
+      }
+    });
+  }
+
+  function broadcastWsClientCount() {
+    const payload = JSON.stringify({
+      type: 'CLIENT_COUNT',
+      count: wss.clients.size,
+      timestamp: new Date().toISOString()
+    });
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(payload);
+      }
+    });
+  }
+
+  // Heartbeat interval to check alive connections
+  const heartbeatInterval = setInterval(() => {
+    wss.clients.forEach((ws) => {
+      const extWs = ws as ExtWebSocket;
+      if (extWs.isAlive === false) {
+        return extWs.terminate();
+      }
+      extWs.isAlive = false;
+      extWs.ping();
+    });
+  }, 30000);
+
+  wss.on('close', () => {
+    clearInterval(heartbeatInterval);
+  });
+
+  wss.on('connection', (ws: ExtWebSocket, req) => {
+    ws.isAlive = true;
+    ws.on('pong', () => {
+      ws.isAlive = true;
+    });
+
+    console.log(`[WebSocket] Client connected from ${req.socket.remoteAddress}. Active: ${wss.clients.size}`);
+
+    // Send initial handshake and full current state
+    ws.send(
+      JSON.stringify({
+        type: 'WS_CONNECTED',
+        message: 'Connected to Vet Superior IQA WebSocket Server',
+        clientCount: wss.clients.size,
+        lastUpdated: appState.lastUpdated,
+        state: appState
+      })
+    );
+
+    // Broadcast client count
+    broadcastWsClientCount();
+
+    ws.on('message', (message: string) => {
+      try {
+        const data = JSON.parse(message.toString());
+
+        if (data.type === 'STATE_UPDATE' && data.state) {
+          appState = {
+            ...data.state,
+            lastUpdated: new Date().toISOString()
+          };
+          persistState();
+          broadcastWsStateUpdate(appState, ws);
+          broadcastSseStateUpdate(appState);
+        } else if (data.type === 'PATCH_STATE' && data.patch) {
+          appState = {
+            ...appState,
+            ...data.patch,
+            lastUpdated: new Date().toISOString()
+          };
+          persistState();
+          broadcastWsStateUpdate(appState, ws);
+          broadcastSseStateUpdate(appState);
+        } else if (data.type === 'PING') {
+          ws.send(JSON.stringify({ type: 'PONG', timestamp: Date.now() }));
+        } else if (data.type === 'USER_JOIN') {
+          ws.userId = data.userId;
+          ws.userName = data.userName;
+        }
+      } catch (err) {
+        console.error('[WebSocket] Failed to parse message:', err);
+      }
+    });
+
+    ws.on('close', () => {
+      console.log(`[WebSocket] Client disconnected. Active: ${wss.clients.size}`);
+      broadcastWsClientCount();
+    });
+
+    ws.on('error', (err) => {
+      console.warn('[WebSocket] Client error:', err);
+    });
+  });
 
   app.use(express.json({ limit: '10mb' }));
 
-  // API Routes
+  // WebSocket Server Diagnostics Endpoint
+  app.get('/api/ws-info', (req: Request, res: Response) => {
+    res.json({
+      status: 'ACTIVE',
+      protocol: 'WebSocket',
+      path: '/ws',
+      port: PORT,
+      connectedClients: wss.clients.size,
+      vercelSupport: {
+        nativeWs: true,
+        recommendedExternal: 'Pusher / Ably / PartyKit / Custom WebSocket Server',
+        instructions: 'Vercel Serverless Lambdas have execution timeouts. Use this full-duplex Node.js server or connect an external WSS URL.'
+      },
+      lastUpdated: appState.lastUpdated,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // REST API Routes
   app.get('/api/state', (req: Request, res: Response) => {
     res.json(appState);
   });
@@ -76,7 +212,8 @@ async function startServer() {
         lastUpdated: new Date().toISOString()
       };
       persistState();
-      broadcastStateUpdate(appState);
+      broadcastWsStateUpdate(appState);
+      broadcastSseStateUpdate(appState);
       res.json({ success: true, lastUpdated: appState.lastUpdated });
     } catch (err) {
       res.status(500).json({ error: 'Failed to update state' });
@@ -93,21 +230,21 @@ async function startServer() {
         lastUpdated: new Date().toISOString()
       };
       persistState();
-      broadcastStateUpdate(appState);
+      broadcastWsStateUpdate(appState);
+      broadcastSseStateUpdate(appState);
       res.json({ success: true, lastUpdated: appState.lastUpdated });
     } catch (err) {
       res.status(500).json({ error: 'Failed to patch state' });
     }
   });
 
-  // Server-Sent Events Endpoint
+  // Server-Sent Events Endpoint (Secondary Fallback)
   app.get('/api/events', (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
-    // Send initial state ping
     res.write(`data: ${JSON.stringify({ type: 'CONNECTED', lastUpdated: appState.lastUpdated })}\n\n`);
 
     sseClients.push(res);
@@ -120,14 +257,15 @@ async function startServer() {
     });
   });
 
-  // Reset to default seed endpoint (for testing/Admin maintenance)
+  // Reset to default seed endpoint
   app.post('/api/state/reset', (req: Request, res: Response) => {
     appState = {
       ...INITIAL_APP_STATE,
       lastUpdated: new Date().toISOString()
     };
     persistState();
-    broadcastStateUpdate(appState);
+    broadcastWsStateUpdate(appState);
+    broadcastSseStateUpdate(appState);
     res.json({ success: true, message: 'Database reset to default seed' });
   });
 
@@ -146,8 +284,8 @@ async function startServer() {
     });
   }
 
-  app.listen(Number(PORT), '0.0.0.0', () => {
-    console.log(`Vet Superior IQA Management Server running on port ${PORT}`);
+  server.listen(Number(PORT), '0.0.0.0', () => {
+    console.log(`Vet Superior IQA Management Server running with WebSocket on port ${PORT}`);
   });
 }
 
