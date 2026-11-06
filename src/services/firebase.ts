@@ -24,6 +24,7 @@ import {
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { AppState, UserProfile } from '../types';
+import { USERS_DATA } from '../data/initialData';
 
 export enum OperationType {
   CREATE = 'create',
@@ -137,20 +138,43 @@ export const FirebaseService = {
       const result = await signInWithPopup(auth, googleAuthProvider);
       const user = result.user;
 
+      // CRITICAL SECURITY REQUIREMENT:
+      // Must verify that user.emailVerified is true
+      if (!user.emailVerified) {
+        await signOut(auth);
+        throw new Error(
+          'บัญชี Google นี้ยังไม่ได้รับการยืนยันอีเมล (Email Not Verified) ระบบกำหนดให้ต้องยืนยันอีเมลก่อนเข้าสู่ระบบเสมอ กรุณายืนยันอีเมลใน Google Account ของท่านก่อนเข้าใช้งาน'
+        );
+      }
+
+      const userEmail = (user.email || '').toLowerCase().trim();
+
+      // Check if email matches company roster or admin
+      const matchedRosterUser = USERS_DATA.find(
+        (u) => u.email.toLowerCase().trim() === userEmail
+      );
+
+      const isAdminUser =
+        userEmail === 'wrpn2535@gmail.com' ||
+        matchedRosterUser?.role === 'ADMIN';
+
       const profile: UserProfile = {
         id: user.uid,
         email: user.email || 'user@vetsuperior.com',
-        name: user.displayName || user.email?.split('@')[0] || 'Google User',
-        departmentCode: 'QMR',
-        departmentName: 'ฝ่ายบริหารคุณภาพ (QMR)',
-        role: user.email === 'wrpn2535@gmail.com' ? 'ADMIN' : 'LEAD_AUDITOR',
-        title: user.email === 'wrpn2535@gmail.com' ? 'System Administrator / Lead Auditor' : 'Lead Auditor',
+        name: user.displayName || matchedRosterUser?.name || user.email?.split('@')[0] || 'Google User',
+        departmentCode: matchedRosterUser?.departmentCode || (isAdminUser ? 'QMR' : 'QA'),
+        departmentName: matchedRosterUser?.departmentName || (isAdminUser ? 'ฝ่ายบริหารคุณภาพ (QMR)' : 'ฝ่ายประกันคุณภาพ (QA)'),
+        role: isAdminUser
+          ? 'ADMIN'
+          : (matchedRosterUser?.role || 'AUDITOR'),
+        title: isAdminUser
+          ? 'System Administrator / Super Auditor'
+          : (matchedRosterUser?.title || 'ผู้ตรวจประเมินคุณภาพ (Verified Google User)'),
         avatarUrl: user.photoURL || undefined,
-        isCustom: false,
+        isCustom: !matchedRosterUser,
       };
 
       // Sync user profile to Firestore
-      const userPath = `users/${user.uid}`;
       try {
         await setDoc(doc(db, 'users', user.uid), profile, { merge: true });
       } catch (err) {

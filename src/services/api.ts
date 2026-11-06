@@ -1,4 +1,4 @@
-import { AppState, ChecklistAssessmentRecord, CapaRecord, UserRole, FormTemplateCustomizer, AnnualPlanDepartment, AuditScheduleItem, UserProfile } from '../types';
+import { AppState, ChecklistAssessmentRecord, CapaRecord, UserRole, FormTemplateCustomizer, AnnualPlanDepartment, AuditScheduleItem, UserProfile, ChecklistItem } from '../types';
 import { INITIAL_APP_STATE } from '../data/initialData';
 import { FirebaseService } from './firebase';
 
@@ -614,6 +614,44 @@ export const ApiService = {
       users: updatedUsers,
       currentUser: currentUpdated
     });
+  },
+
+  async saveUser(user: UserProfile): Promise<void> {
+    const existingIndex = currentState.users.findIndex((u) => u.id === user.id);
+    let updatedUsers = [...currentState.users];
+    if (existingIndex >= 0) {
+      updatedUsers[existingIndex] = user;
+    } else {
+      updatedUsers.push(user);
+    }
+    const currentUpdated = updatedUsers.find(u => u.id === currentState.currentUser.id) || currentState.currentUser;
+    return this.patchState({
+      users: updatedUsers,
+      currentUser: currentUpdated
+    });
+  },
+
+  async deleteUser(userId: string): Promise<void> {
+    const updatedUsers = currentState.users.filter((u) => u.id !== userId);
+    return this.patchState({
+      users: updatedUsers
+    });
+  },
+
+  async saveChecklistItem(item: ChecklistItem): Promise<void> {
+    const existingIndex = currentState.checklistBank.findIndex((q) => q.id === item.id);
+    let updatedBank = [...currentState.checklistBank];
+    if (existingIndex >= 0) {
+      updatedBank[existingIndex] = item;
+    } else {
+      updatedBank.push(item);
+    }
+    return this.patchState({ checklistBank: updatedBank });
+  },
+
+  async deleteChecklistItem(itemId: string): Promise<void> {
+    const updatedBank = currentState.checklistBank.filter((q) => q.id !== itemId);
+    return this.patchState({ checklistBank: updatedBank });
   },
 
   async updateTemplateConfig(config: FormTemplateCustomizer): Promise<void> {

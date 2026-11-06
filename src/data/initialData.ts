@@ -19,7 +19,15 @@ export const DEPARTMENTS_DATA: DepartmentInfo[] = [
   { code: 'WH', nameTh: 'คลังวัตถุดิบ (WH)', nameEn: 'Raw Material Warehouse', category: 'Operations' },
   { code: 'PK', nameTh: 'คลังบรรจุภัณฑ์ (PK)', nameEn: 'Packaging Warehouse', category: 'Operations' },
   { code: 'LG', nameTh: 'ฝ่ายจัดส่ง (LG)', nameEn: 'Logistics & Distribution', category: 'Operations' },
-  { code: 'PT', nameTh: 'ฝ่ายผลิตและไลน์ L1-L9 (PT)', nameEn: 'Production & Lines 1-9', category: 'Operations', subLines: ['Line 1 (ยาน้ำ)', 'Line 2 (ยาผง)', 'Line 3 (สารผสมล่วงหน้า)', 'Line 4 (ยาเม็ด)', 'Line 5 (แชมพู/สเปรย์)', 'Line 6 (อาหารเสริมสัตว์เลี้ยง)', 'Line 7 (โภชนเภสัช)', 'Line 8 (Pet Food)', 'Line 9 (บรรจุเสร็จ)'] },
+  { code: 'PT-L1', nameTh: 'ฝ่ายผลิต Line 1 (ยาน้ำ)', nameEn: 'Production Line 1 (Liquid Medicine)', category: 'Operations' },
+  { code: 'PT-L2', nameTh: 'ฝ่ายผลิต Line 2 (ยาผง)', nameEn: 'Production Line 2 (Powder Medicine)', category: 'Operations' },
+  { code: 'PT-L3', nameTh: 'ฝ่ายผลิต Line 3 (สารผสมล่วงหน้า/Premix)', nameEn: 'Production Line 3 (Premix)', category: 'Operations' },
+  { code: 'PT-L4', nameTh: 'ฝ่ายผลิต Line 4 (ยาเม็ด)', nameEn: 'Production Line 4 (Tablet Medicine)', category: 'Operations' },
+  { code: 'PT-L5', nameTh: 'ฝ่ายผลิต Line 5 (แชมพู/สเปรย์)', nameEn: 'Production Line 5 (Shampoo/Spray)', category: 'Operations' },
+  { code: 'PT-L6', nameTh: 'ฝ่ายผลิต Line 6 (อาหารเสริมสัตว์เลี้ยง)', nameEn: 'Production Line 6 (Pet Supplements)', category: 'Operations' },
+  { code: 'PT-L7', nameTh: 'ฝ่ายผลิต Line 7 (โภชนเภสัช)', nameEn: 'Production Line 7 (Nutraceuticals)', category: 'Operations' },
+  { code: 'PT-L8', nameTh: 'ฝ่ายผลิต Line 8 (Pet Food)', nameEn: 'Production Line 8 (Pet Food)', category: 'Operations' },
+  { code: 'PT-L9', nameTh: 'ฝ่ายผลิต Line 9 (บรรจุเสร็จ)', nameEn: 'Production Line 9 (Final Pack)', category: 'Operations' },
 ];
 
 export const USERS_DATA: UserProfile[] = [
@@ -32,15 +40,15 @@ export const USERS_DATA: UserProfile[] = [
   { id: 'usr-06', email: 'humanresource.01@vetsuperior.com', name: 'นายธนธัช พรสถิตย์วรกุล', departmentCode: 'HR', departmentName: 'ฝ่ายบุคคลและธุรการ (HR)', role: 'AUDITOR', title: 'หัวหน้างานสรรหาและพัฒนาบุคลากร' },
   { id: 'usr-07', email: 'samapon.vsc@gmail.com', name: 'นายโสภณ วิเศษทรัพย์', departmentCode: 'HR', departmentName: 'ฝ่ายบุคคลสำนักงาน (HR)', role: 'AUDITEE', title: 'เจ้าหน้าที่บุคคลสำนักงาน' },
   { id: 'usr-08', email: 'warehouse.01@vetsuperior.com', name: 'นายนิธิศ พลแสน', departmentCode: 'LG', departmentName: 'ฝ่ายจัดส่ง (LG)', role: 'AUDITOR', title: 'หัวหน้าฝ่ายควบคุมการกระจายสินค้า' },
-  { id: 'usr-09', email: 'production.04@vetsuperior.com', name: 'นายจตุรวิทย์ ฝั้นปันวงค์', departmentCode: 'PT', departmentName: 'ฝ่ายผลิต Line 1', role: 'AUDITOR', title: 'หัวหน้างานผลิต Line 1' },
-  { id: 'usr-10', email: 'production.07@vetsuperior.com', name: 'นายสุรชา ส่งคืน', departmentCode: 'PT', departmentName: 'ฝ่ายผลิต Line 2', role: 'AUDITOR', title: 'หัวหน้างานผลิต Line 2' },
-  { id: 'usr-11', email: 'production.05@vetsuperior.com', name: 'นายภราดร ขาวเจริญ', departmentCode: 'PT', departmentName: 'ฝ่ายผลิต Line 3', role: 'AUDITOR', title: 'หัวหน้างานผลิต Line 3' },
-  { id: 'usr-12', email: 'production.01@vetsuperior.com', name: 'นายอภิเษก สุขประมูล', departmentCode: 'PT', departmentName: 'ฝ่ายผลิต Line 4', role: 'AUDITOR', title: 'หัวหน้างานผลิต Line 4' },
-  { id: 'usr-13', email: 'production.03@vetsuperior.com', name: 'นายพัฒนพงศ์ เจียรจิรพงศ์', departmentCode: 'PT', departmentName: 'ฝ่ายผลิต Line 5', role: 'AUDITOR', title: 'หัวหน้างานผลิต Line 5' },
-  { id: 'usr-14', email: 'production.02@vetsuperior.com', name: 'น.ส.ชญาดา วิโชติโภคิน', departmentCode: 'PT', departmentName: 'ฝ่ายผลิต Line 6', role: 'AUDITOR', title: 'หัวหน้างานผลิต Line 6' },
-  { id: 'usr-15', email: 'production.06@vetsuperior.com', name: 'นายสัจจา สมานมิตร', departmentCode: 'PT', departmentName: 'ฝ่ายผลิต Line 7', role: 'AUDITOR', title: 'หัวหน้างานผลิต Line 7' },
-  { id: 'usr-16', email: 'production.petfood01@gmail.com', name: 'น.ส.สาวนา มามุ', departmentCode: 'PT', departmentName: 'ฝ่ายผลิต Line 8', role: 'AUDITEE', title: 'หัวหน้างานผลิต Pet Food Line 8' },
-  { id: 'usr-17', email: 'production.petfood02@gmail.com', name: 'นายตันติกร พิทักษ์สกุล', departmentCode: 'PT', departmentName: 'ฝ่ายผลิต Line 9', role: 'AUDITOR', title: 'หัวหน้างานบรรจุ Line 9' },
+  { id: 'usr-09', email: 'production.04@vetsuperior.com', name: 'นายจตุรวิทย์ ฝั้นปันวงค์', departmentCode: 'PT-L1', departmentName: 'ฝ่ายผลิต Line 1 (ยาน้ำ)', role: 'AUDITEE', title: 'หัวหน้างานผลิต Line 1 (ยาน้ำ)' },
+  { id: 'usr-10', email: 'production.07@vetsuperior.com', name: 'นายสุรชา ส่งคืน', departmentCode: 'PT-L2', departmentName: 'ฝ่ายผลิต Line 2 (ยาผง)', role: 'AUDITEE', title: 'หัวหน้างานผลิต Line 2 (ยาผง)' },
+  { id: 'usr-11', email: 'production.05@vetsuperior.com', name: 'นายภราดร ขาวเจริญ', departmentCode: 'PT-L3', departmentName: 'ฝ่ายผลิต Line 3 (สารผสมล่วงหน้า/Premix)', role: 'AUDITEE', title: 'หัวหน้างานผลิต Line 3 (Premix)' },
+  { id: 'usr-12', email: 'production.01@vetsuperior.com', name: 'นายอภิเษก สุขประมูล', departmentCode: 'PT-L4', departmentName: 'ฝ่ายผลิต Line 4 (ยาเม็ด)', role: 'AUDITEE', title: 'หัวหน้างานผลิต Line 4 (ยาเม็ด)' },
+  { id: 'usr-13', email: 'production.03@vetsuperior.com', name: 'นายพัฒนพงศ์ เจียรจิรพงศ์', departmentCode: 'PT-L5', departmentName: 'ฝ่ายผลิต Line 5 (แชมพู/สเปรย์)', role: 'AUDITEE', title: 'หัวหน้างานผลิต Line 5 (แชมพู/สเปรย์)' },
+  { id: 'usr-14', email: 'production.02@vetsuperior.com', name: 'น.ส.ชญาดา วิโชติโภคิน', departmentCode: 'PT-L6', departmentName: 'ฝ่ายผลิต Line 6 (อาหารเสริมสัตว์เลี้ยง)', role: 'AUDITEE', title: 'หัวหน้างานผลิต Line 6 (อาหารเสริมสัตว์)' },
+  { id: 'usr-15', email: 'production.06@vetsuperior.com', name: 'นายสัจจา สมานมิตร', departmentCode: 'PT-L7', departmentName: 'ฝ่ายผลิต Line 7 (โภชนเภสัช)', role: 'AUDITEE', title: 'หัวหน้างานผลิต Line 7 (โภชนเภสัช)' },
+  { id: 'usr-16', email: 'production.petfood01@gmail.com', name: 'น.ส.สาวนา มามุ', departmentCode: 'PT-L8', departmentName: 'ฝ่ายผลิต Line 8 (Pet Food)', role: 'AUDITEE', title: 'หัวหน้างานผลิต Line 8 (Pet Food)' },
+  { id: 'usr-17', email: 'production.petfood02@gmail.com', name: 'นายตันติกร พิทักษ์สกุล', departmentCode: 'PT-L9', departmentName: 'ฝ่ายผลิต Line 9 (บรรจุเสร็จ)', role: 'AUDITEE', title: 'หัวหน้างานบรรจุ Line 9 (Final Pack)' },
   { id: 'usr-18', email: 'microbiology@vetsuperior.com', name: 'น.ส.ณสินธร อดิศักดิ์โสภณ', departmentCode: 'MC', departmentName: 'ห้องปฏิบัติการจุลชีววิทยา (MC)', role: 'AUDITEE', title: 'หัวหน้าห้องปฏิบัติการจุลชีววิทยา' },
   { id: 'usr-19', email: 'packaging.01@vetsuperior.com', name: 'น.ส.นฤมล ขาวเจริญ', departmentCode: 'PK', departmentName: 'คลังบรรจุภัณฑ์ (PK)', role: 'AUDITOR', title: 'หัวหน้าคลังบรรจุภัณฑ์' },
   { id: 'usr-20', email: 'pattaradanai_h@vetsuperior.com', name: 'นายภัทรดนัย หอมชื่นใจ', departmentCode: 'PR', departmentName: 'ฝ่ายจัดซื้อ (PR)', role: 'AUDITEE', title: 'เจ้าหน้าที่จัดซื้อวัตถุดิบและอุปกรณ์' },
@@ -510,55 +518,252 @@ export const CHECKLIST_BANK_DATA: ChecklistItem[] = [
     depthLevel: 'standard'
   },
 
-  // 18. PT (ฝ่ายผลิตและไลน์ L1-L9)
+  // 18. PT Lines (L1 - L9) and General Production
+  // PT-L1: ฝ่ายผลิต Line 1 (ยาน้ำ)
   {
-    id: 'chk-pt-01',
-    departmentCode: 'PT',
-    itemCode: 'PT-01',
-    clauses: { iso9001: '8.5.1', famiQs: '8.4', dldGhpsHaccp: 'GHPs: ข้อ 8.2, 8.4, 13.1' },
-    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 8.2, 8.4, 13.1',
-    questionTh: 'กระบวนการผลิตดำเนินตามขั้นตอน SOP/WI มีการบันทึกสภาวะการทำงาน และควบคุมสุขลักษณะพนักงานอย่างเคร่งครัดหรือไม่?',
-    evidenceExamples: ['บันทึกการควบคุมกระบวนการผลิตประจำวัน (Production Batch Record)', 'พนักงานแต่งกายตามเกณฑ์และปฏิบัติตามขั้นตอนอย่างถูกต้อง'],
+    id: 'chk-pt-l1-01',
+    departmentCode: 'PT-L1',
+    itemCode: 'PT-L1-01',
+    clauses: { iso9001: '8.5.1', famiQs: '8.4', dldGhpsHaccp: 'GHPs: ข้อ 8.2, 11.1' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 8.2, 11.1',
+    questionTh: 'ระบบถังผสมยาน้ำ ปั๊ม และท่อลำเลียง มีขั้นตอนการทำความสะอาด CIP/SIP และการตรวจคราบสารล้างตกค้าง (pH/Conductivity) ก่อนเริ่ม Batch ใหม่หรือไม่?',
+    evidenceExamples: ['บันทึก CIP/SIP Log Sheet ประจำถังผสมยาน้ำ', 'ผลการตรวจ Rinse Water ไม่พบสารชะล้างตกค้าง'],
     depthLevel: 'standard'
   },
   {
-    id: 'chk-pt-02',
-    departmentCode: 'PT',
-    itemCode: 'PT-02',
-    clauses: { iso9001: '8.5.1', famiQs: '8.4, 8.5.1', dldGhpsHaccp: 'HACCP: ข้อ 17 - 20' },
-    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4, 8.5.1 | DLD HACCP: ข้อ 17 - 20',
-    questionTh: 'จุดวิกฤต CCP/OPRP หน้างาน (เช่น Retort, Extruder, Sieve, Metal Detector) ได้รับการเฝ้าระวัง บันทึก และคุมตาม Critical Limit หรือไม่?',
-    evidenceExamples: ['ใบบันทึกการเฝ้าระวังจุด CCP/OPRP ตามรอบเวลา', 'บันทึกการทดสอบเครื่องตรวจจับโลหะด้วย Test Piece (Fe, Non-Fe, SS)'],
+    id: 'chk-pt-l1-02',
+    departmentCode: 'PT-L1',
+    itemCode: 'PT-L1-02',
+    clauses: { iso9001: '8.5.1', famiQs: '8.4', dldGhpsHaccp: 'GHPs: ข้อ 13.1, 13.2' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 13.1, 13.2',
+    questionTh: 'มีการควบคุมอุณหภูมิ ความเร็วรอบกวนผสม (Homogenizer) และการตรวจสภาพไส้กรองน้ำยาก่อนบรรจุเพื่อป้องกันสิ่งแปลกปลอมหรือไม่?',
+    evidenceExamples: ['ใบบันทึก Batch Production Record บันทึกค่า RPM และ Temp', 'บันทึกการเปลี่ยนและตรวจสอบความสมบูรณ์ของไส้กรอง (Filter Integrity)'],
     depthLevel: 'standard'
   },
   {
-    id: 'chk-pt-03',
-    departmentCode: 'PT',
-    itemCode: 'PT-03',
+    id: 'chk-pt-l1-03',
+    departmentCode: 'PT-L1',
+    itemCode: 'PT-L1-03',
+    clauses: { iso9001: '8.5.1, 8.5.2', famiQs: '8.5.1', dldGhpsHaccp: 'GHPs: ข้อ 13.1.2' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.5.1 | DLD GHPs: ข้อ 13.1.2',
+    questionTh: 'มีการสุ่มตรวจสอบปริมาตรบรรจุ (Filling Volume) และแรงบิดปิดฝาขวด (Torque Test) เพื่อป้องกันการรั่วซึมระหว่างขนส่งหรือไม่?',
+    evidenceExamples: ['บันทึก In-process Check ปริมาตรบรรจุทุก 1 ชม.', 'รายงานการทดสอบ Torque Test ฝาขวดและผล Leak Test'],
+    depthLevel: 'standard'
+  },
+
+  // PT-L2: ฝ่ายผลิต Line 2 (ยาผง)
+  {
+    id: 'chk-pt-l2-01',
+    departmentCode: 'PT-L2',
+    itemCode: 'PT-L2-01',
+    clauses: { iso9001: '8.5.1', famiQs: '8.4', dldGhpsHaccp: 'GHPs: ข้อ 9.2, 13.2.5' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 9.2, 13.2.5',
+    questionTh: 'เครื่องผสมยาผง (Ribbon Blender) ซีลแกนเพลา และระบบดูดฝุ่น (Dust Collector) อยู่ในสภาพสมบูรณ์ ไม่มีการปนเปื้อนข้ามและฝุ่นฟุ้งกระจายหรือไม่?',
+    evidenceExamples: ['บันทึกตรวจสอบเครื่องผสมก่อนเดินเครื่อง (Pre-operational Checklist)', 'แผนและบันทึกการทำความสะอาดถุงกรองดักฝุ่น'],
+    depthLevel: 'standard'
+  },
+  {
+    id: 'chk-pt-l2-02',
+    departmentCode: 'PT-L2',
+    itemCode: 'PT-L2-02',
+    clauses: { iso9001: '8.5.1', famiQs: '8.4', dldGhpsHaccp: 'GHPs: ข้อ 13.1, 13.2' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 13.1, 13.2',
+    questionTh: 'มีการตรวจสอบสภาพตะแกรงร่อนผงยา (Sieve Mesh Screen) ก่อนและหลังการผลิต เพื่อยืนยันว่าตะแกรงไม่ฉีกขาดและไม่มีสิ่งแปลกปลอมตกหล่นหรือไม่?',
+    evidenceExamples: ['บันทึกการตรวจสอบตะแกรงร่อนก่อน-หลังการผสมยาผง', 'ขนาดเบอร์ Mesh Screen ตรงตามข้อกำหนดในสูตรการผลิต'],
+    depthLevel: 'standard'
+  },
+  {
+    id: 'chk-pt-l2-03',
+    departmentCode: 'PT-L2',
+    itemCode: 'PT-L2-03',
+    clauses: { iso9001: '8.5.1', famiQs: '8.5.1', dldGhpsHaccp: 'GHPs: ข้อ 13.1.2' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.5.1 | DLD GHPs: ข้อ 13.1.2',
+    questionTh: 'มีการควบคุมอุณหภูมิและความชื้นสัมพัทธ์ในห้องผสมยาผง และทดสอบรอยเชื่อมความร้อนของซองบรรจุ (Heat Seal Integrity) อย่างสม่ำเสมอหรือไม่?',
+    evidenceExamples: ['บันทึกอุณหภูมิและความชื้นสัมพัทธ์ห้องผสมยาผง (Temp & RH Log)', 'ผลการทดสอบแรงดึงรอยซีลซองยาผง'],
+    depthLevel: 'standard'
+  },
+
+  // PT-L3: ฝ่ายผลิต Line 3 (สารผสมล่วงหน้า/Premix)
+  {
+    id: 'chk-pt-l3-01',
+    departmentCode: 'PT-L3',
+    itemCode: 'PT-L3-01',
     clauses: { famiQs: '8.4.2', dldGhpsHaccp: 'GHPs: ข้อ 13.1, 13.2.2' },
     clauseSummary: 'FAMI-QS: 8.4.2 | DLD GHPs: ข้อ 13.1, 13.2.2',
-    questionTh: 'มีการทดสอบและบันทึกความถ้วนทั่วในการผสม (Mixing Homogeneity Test Records) สำหรับไลน์พรีมิกซ์/สารเติมแต่งตามกำหนดหรือไม่?',
-    evidenceExamples: ['รายงานผลการทดสอบ Homogeneity Test ประจำปี', 'ค่า CV (Coefficient of Variation) อยู่ในเกณฑ์ที่ยอมรับได้ (เช่น < 5% หรือ < 10%)'],
+    questionTh: 'มีการทดสอบความถ้วนทั่วในการผสม (Mixing Homogeneity Test) ประจำปีของเครื่องผสมพรีมิกซ์ และค่า CV อยู่ในเกณฑ์ที่ FAMI-QS กำหนดหรือไม่?',
+    evidenceExamples: ['รายงานผลการทดสอบ Homogeneity Test ประจำปี', 'ค่าสัมประสิทธิ์ความแปรปรวน (CV) ผ่านเกณฑ์มาตรฐาน (< 5%)'],
     depthLevel: 'standard'
   },
   {
-    id: 'chk-pt-04',
-    departmentCode: 'PT',
-    itemCode: 'PT-04',
+    id: 'chk-pt-l3-02',
+    departmentCode: 'PT-L3',
+    itemCode: 'PT-L3-02',
     clauses: { famiQs: '8.4.3', dldGhpsHaccp: 'GHPs: ข้อ 13.2.2, 13.2.5' },
     clauseSummary: 'FAMI-QS: 8.4.3 | DLD GHPs: ข้อ 13.2.2, 13.2.5',
-    questionTh: 'มีมาตรการป้องกันและควบคุมระดับการตกค้างข้าม Batch (Carry-over Rate) รวมถึงการทำ Flush Sequence อย่างถูกต้องหรือไม่?',
-    evidenceExamples: ['รายงานการทดสอบ Carry-over Rate ในเครื่องผสม/ระบบลำเลียง', 'บันทึกการปฏิบัติตาม Flush Protocol และการกำจัดเศษ Flush Material'],
+    questionTh: 'มีมาตรการควบคุมอัตราการปนเปื้อนข้ามรุ่น (Carry-over Rate) มี Flush Sequence ชัดเจน และควบคุมการจัดเก็บ/กำจัด Flush Material หรือไม่?',
+    evidenceExamples: ['รายงานการทดสอบ Carry-over Rate ในระบบผสมพรีมิกซ์', 'บันทึกการทำ Flush ด้วยแกลบ/สารตัวพา และป้ายชี้บ่ง Flush Material'],
     depthLevel: 'standard'
   },
   {
-    id: 'chk-pt-05',
-    departmentCode: 'PT',
-    itemCode: 'PT-05',
-    clauses: { iso9001: '8.7', famiQs: '8.7', dldGhpsHaccp: 'HACCP: ข้อ 20' },
-    clauseSummary: 'ISO 9001: 8.7 | FAMI-QS: 8.7 | DLD HACCP: ข้อ 20',
-    questionTh: 'เมื่อเกิดการเบี่ยงเบนของจุด CCP/OPRP มีการปฏิบัติตามขั้นตอน Corrective Action กักสินค้า และลงบันทึกการแก้ไขทันทีหรือไม่?',
-    evidenceExamples: ['บันทึกการแก้ไขเมื่อเกิดเบี่ยงเบน (Corrective Action Log)', 'ป้ายกักสินค้า NC และบันทึกการประเมินความปลอดภัยโดย QA'],
+    id: 'chk-pt-l3-03',
+    departmentCode: 'PT-L3',
+    itemCode: 'PT-L3-03',
+    clauses: { iso9001: '7.1.5', famiQs: '7.1.5', dldGhpsHaccp: 'GHPs: ข้อ 13.1.1' },
+    clauseSummary: 'ISO 9001: 7.1.5 | FAMI-QS: 7.1.5 | DLD GHPs: ข้อ 13.1.1',
+    questionTh: 'เครื่องชั่งสารสกัดสำคัญและสารเสริมเข้มข้น (Micro-ingredients) มีการทวนสอบความเที่ยงตรงประจำวันด้วยตุ้มน้ำหนักมาตรฐาน (Daily Calibration Check) หรือไม่?',
+    evidenceExamples: ['ใบบันทึก Daily Balance Check ก่อนเริ่มงานชั่งสารสำคัญ', 'ตุ้มน้ำหนักมาตรฐานมีใบรับรองสอบเทียบที่ยังไม่หมดอายุ'],
+    depthLevel: 'standard'
+  },
+
+  // PT-L4: ฝ่ายผลิต Line 4 (ยาเม็ด)
+  {
+    id: 'chk-pt-l4-01',
+    departmentCode: 'PT-L4',
+    itemCode: 'PT-L4-01',
+    clauses: { iso9001: '8.5.1', famiQs: '8.4', dldGhpsHaccp: 'GHPs: ข้อ 11.1' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 11.1',
+    questionTh: 'เครื่องตอกยาเม็ด (Rotary Tablet Press) สากและดาย (Punch & Die) ได้รับการทำความสะอาด ตรวจสอบการสึกหรอ และหล่อลื่นด้วยจารบีเกรดอาหารหรือไม่?',
+    evidenceExamples: ['บันทึกการบำรุงรักษาและตรวจสอบสาก-ดายตอกยาเม็ด', 'ใบรับรองสารหล่อลื่น Food/Feed Grade Lubricant'],
+    depthLevel: 'standard'
+  },
+  {
+    id: 'chk-pt-l4-02',
+    departmentCode: 'PT-L4',
+    itemCode: 'PT-L4-02',
+    clauses: { iso9001: '8.5.1', famiQs: '8.5.1', dldGhpsHaccp: 'GHPs: ข้อ 13.1.2' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.5.1 | DLD GHPs: ข้อ 13.1.2',
+    questionTh: 'มีการสุ่มตรวจ In-process Control ของเม็ดยาระหว่างการผลิต ทั้งน้ำหนักเฉลี่ย, ความแข็ง (Hardness) และความกร่อน (Friability) ครบถ้วนตาม SOP หรือไม่?',
+    evidenceExamples: ['ใบบันทึก In-process Tablet Physical Testing ตามรอบเวลา', 'ค่าความแข็งและความกร่อนอยู่ในเกณฑ์มาตรฐานที่ระบุในสูตร'],
+    depthLevel: 'standard'
+  },
+
+  // PT-L5: ฝ่ายผลิต Line 5 (แชมพู/สเปรย์)
+  {
+    id: 'chk-pt-l5-01',
+    departmentCode: 'PT-L5',
+    itemCode: 'PT-L5-01',
+    clauses: { iso9001: '8.5.1', famiQs: '8.4', dldGhpsHaccp: 'GHPs: ข้อ 8.2, 13.1' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 8.2, 13.1',
+    questionTh: 'กระบวนการผสมแชมพูและสเปรย์มีการควบคุมอัตราส่วนสารลดแรงตึงผิว สารออกฤทธิ์ และตรวจวัดค่า pH และความหนืดตรงตามสูตรหรือไม่?',
+    evidenceExamples: ['บันทึกการควบคุมกระบวนการผลิตแชมพู/สเปรย์', 'ผลการตรวจวัดค่า pH และความหนืด (Viscosity) ก่อนปล่อยบรรจุ'],
+    depthLevel: 'standard'
+  },
+  {
+    id: 'chk-pt-l5-02',
+    departmentCode: 'PT-L5',
+    itemCode: 'PT-L5-02',
+    clauses: { iso9001: '8.5.1', famiQs: '8.5.1', dldGhpsHaccp: 'GHPs: ข้อ 13.1.2' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.5.1 | DLD GHPs: ข้อ 13.1.2',
+    questionTh: 'หัวฉีดสเปรย์และสายจ่ายบรรจุได้รับการตรวจสอบความสะอาด การทำงานของหัวสเปรย์ และการทดสอบการรั่วซึม (Pump/Trigger Leak Test) หรือไม่?',
+    evidenceExamples: ['บันทึกการสุ่มตรวจการทำงานของหัวฉีดสเปรย์', 'รายงานผลการทดสอบการรั่วซึมของหัวปั๊ม/สเปรย์'],
+    depthLevel: 'standard'
+  },
+
+  // PT-L6: ฝ่ายผลิต Line 6 (อาหารเสริมสัตว์เลี้ยง)
+  {
+    id: 'chk-pt-l6-01',
+    departmentCode: 'PT-L6',
+    itemCode: 'PT-L6-01',
+    clauses: { iso9001: '8.5.1', famiQs: '8.4', dldGhpsHaccp: 'GHPs: ข้อ 13.1.1, 13.2.1' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 13.1.1, 13.2.1',
+    questionTh: 'การผลิตอาหารเสริมสัตว์เลี้ยง (วิตามิน/พาสต์/ผงชง) มีการตรวจสอบปริมาณสารสำคัญ และควบคุมความสะอาดตามเกณฑ์สุขลักษณะอย่างเคร่งครัดหรือไม่?',
+    evidenceExamples: ['ใบบันทึกการผลิตอาหารเสริมสัตว์เลี้ยงและทวนสอบสารสำคัญ', 'บันทึกการตรวจสุขลักษณะพนักงานและสภาพแวดล้อมพื้นที่ผลิต'],
+    depthLevel: 'standard'
+  },
+  {
+    id: 'chk-pt-l6-02',
+    departmentCode: 'PT-L6',
+    itemCode: 'PT-L6-02',
+    clauses: { famiQs: '8.4.3', dldGhpsHaccp: 'GHPs: ข้อ 13.2.5' },
+    clauseSummary: 'FAMI-QS: 8.4.3 | DLD GHPs: ข้อ 13.2.5',
+    questionTh: 'มีระบบควบคุมสารก่อภูมิแพ้ (Allergen Cross-contact Control) ในผลิตภัณฑ์อาหารเสริมสัตว์เลี้ยงที่มีส่วนผสมของโปรตีนเฉพาะ เช่น ไก่ ปลา นม หรือไม่?',
+    evidenceExamples: ['ขั้นตอนการล้างทำความสะอาดหลังสูตรที่มีสารก่อภูมิแพ้', 'บันทึกการตรวจสอบ Swab Test สารก่อภูมิแพ้ตกค้าง'],
+    depthLevel: 'standard'
+  },
+
+  // PT-L7: ฝ่ายผลิต Line 7 (โภชนเภสัช)
+  {
+    id: 'chk-pt-l7-01',
+    departmentCode: 'PT-L7',
+    itemCode: 'PT-L7-01',
+    clauses: { iso9001: '7.1.4', famiQs: '7.1.4', dldGhpsHaccp: 'GHPs: ข้อ 9.2, 10.1' },
+    clauseSummary: 'ISO 9001: 7.1.4 | FAMI-QS: 7.1.4 | DLD GHPs: ข้อ 9.2, 10.1',
+    questionTh: 'ห้องผลิตโภชนเภสัชมีการควบคุมความดันบวก (Positive Pressure) อุณหภูมิ และความชื้นสัมพัทธ์ พร้อมขั้นตอนการเปลี่ยนชุดเข้าห้องสะอาดอย่างถูกต้องหรือไม่?',
+    evidenceExamples: ['บันทึกความดันต่าง (Magnehelic Gauge Differential Pressure)', 'ระเบียบการสวมชุด Cleanroom Gowning และการผ่าน Air Shower'],
+    depthLevel: 'standard'
+  },
+  {
+    id: 'chk-pt-l7-02',
+    departmentCode: 'PT-L7',
+    itemCode: 'PT-L7-02',
+    clauses: { iso9001: '8.5.1', famiQs: '8.5', dldGhpsHaccp: 'GHPs: ข้อ 13.1.2' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.5 | DLD GHPs: ข้อ 13.1.2',
+    questionTh: 'มีการคำนวณและกระทบยอดผลผลิต (Yield Reconciliation) ทุก Batch และมีเกณฑ์สอบสวนกรณีเกิดส่วนต่างเกินค่าควบคุมหรือไม่?',
+    evidenceExamples: ['ใบบันทึกการคำนวณ Yield Reconciliation ใน Batch Record', 'บันทึกการสอบสวนกรณี Yield เบี่ยงเบนเกินเกณฑ์'],
+    depthLevel: 'standard'
+  },
+
+  // PT-L8: ฝ่ายผลิต Line 8 (Pet Food)
+  {
+    id: 'chk-pt-l8-01',
+    departmentCode: 'PT-L8',
+    itemCode: 'PT-L8-01',
+    clauses: { famiQs: '8.4', dldGhpsHaccp: 'HACCP: ข้อ 17, 18' },
+    clauseSummary: 'FAMI-QS: 8.4 | DLD HACCP: ข้อ 17, 18',
+    questionTh: 'จุดวิกฤต CCP เครื่องเอ็กซ์ทรูเดอร์ (Extruder Temperature & Pressure) ได้รับการบันทึกต่อเนื่องและคุมให้อยู่ใน Critical Limits เพื่อฆ่าเชื้อ Salmonella หรือไม่?',
+    evidenceExamples: ['บันทึกอุณหภูมิและความดัน Extruder Chart/SCADA Log', 'เอกสารทวนสอบความถูกต้องของเซนเซอร์วัดอุณหภูมิ CCP'],
+    depthLevel: 'standard'
+  },
+  {
+    id: 'chk-pt-l8-02',
+    departmentCode: 'PT-L8',
+    itemCode: 'PT-L8-02',
+    clauses: { famiQs: '8.4', dldGhpsHaccp: 'HACCP: ข้อ 17, 19' },
+    clauseSummary: 'FAMI-QS: 8.4 | DLD HACCP: ข้อ 17, 19',
+    questionTh: 'จุดวิกฤต CCP เครื่องตรวจจับโลหะ (Metal Detector) ประจำไลน์ Pet Food ได้รับการทดสอบด้วย Test Piece (Fe, Non-Fe, SS) ทุก 2 ชั่วโมง และบันทึกผลครบถ้วนหรือไม่?',
+    evidenceExamples: ['ใบบันทึกการทดสอบ Metal Detector ทุก 2 ชม.', 'การทดสอบกลไก Reject Mechanism ผลักสินค้าชิ้นทดสอบตกรางอย่างถูกต้อง'],
+    depthLevel: 'standard'
+  },
+  {
+    id: 'chk-pt-l8-03',
+    departmentCode: 'PT-L8',
+    itemCode: 'PT-L8-03',
+    clauses: { famiQs: '8.4', dldGhpsHaccp: 'GHPs: ข้อ 13.1, 13.2' },
+    clauseSummary: 'FAMI-QS: 8.4 | DLD GHPs: ข้อ 13.1, 13.2',
+    questionTh: 'การอบแห้งเม็ดอาหารสัตว์ (Dryer) มีการตรวจวัดค่าความชื้นและ Water Activity (aw) ให้อยู่ในเกณฑ์ที่ป้องกันเชื้อราหรือไม่?',
+    evidenceExamples: ['บันทึกผลการตรวจวิเคราะห์ Moisture & aw ของเม็ดอาหารสัตว์', 'เกณฑ์ค่าความชื้นควบคุมไม่เกินค่ากำหนดใน Specification'],
+    depthLevel: 'standard'
+  },
+
+  // PT-L9: ฝ่ายผลิต Line 9 (บรรจุเสร็จ)
+  {
+    id: 'chk-pt-l9-01',
+    departmentCode: 'PT-L9',
+    itemCode: 'PT-L9-01',
+    clauses: { iso9001: '8.5.2, 8.5.4', famiQs: '8.5.2, 8.6', dldGhpsHaccp: 'GHPs: ข้อ 14.1, 14.3' },
+    clauseSummary: 'ISO 9001: 8.5.2, 8.5.4 | FAMI-QS: 8.5.2, 8.6 | DLD GHPs: ข้อ 14.1, 14.3',
+    questionTh: 'การพิมพ์วันที่ผลิต วันหมดอายุ และเลข Lot Number บนบรรจุภัณฑ์สำเร็จรูป มีความคมชัด ถูกต้องตรงกับใบสั่งผลิต และสามารถสอบกลับได้หรือไม่?',
+    evidenceExamples: ['ตัวอย่างตัวพิมพ์ Inkjet Coding บนบรรจุภัณฑ์เสร็จ', 'บันทึกการตรวจสอบความถูกต้องของฉลากก่อนเริ่มบรรจุกล่อง'],
+    depthLevel: 'standard'
+  },
+  {
+    id: 'chk-pt-l9-02',
+    departmentCode: 'PT-L9',
+    itemCode: 'PT-L9-02',
+    clauses: { iso9001: '8.5.1', famiQs: '8.5.1', dldGhpsHaccp: 'GHPs: ข้อ 13.1.2' },
+    clauseSummary: 'ISO 9001: 8.5.1 | FAMI-QS: 8.5.1 | DLD GHPs: ข้อ 13.1.2',
+    questionTh: 'เครื่องชั่งน้ำหนักอัตโนมัติ (Checkweigher) และเครื่องตรวจสอบสิ่งแปลกปลอมปลายทางได้รับการทดสอบความถูกต้องและระบบ Reject ทำงานอย่างสมบูรณ์หรือไม่?',
+    evidenceExamples: ['บันทึกการทดสอบ Checkweigher ด้วยตุ้มมาตรฐาน', 'การทดสอบระบบคัดแยกกล่องน้ำหนักเกิน/ขาด'],
+    depthLevel: 'standard'
+  },
+  {
+    id: 'chk-pt-l9-03',
+    departmentCode: 'PT-L9',
+    itemCode: 'PT-L9-03',
+    clauses: { iso9001: '8.5.4', famiQs: '8.6', dldGhpsHaccp: 'GHPs: ข้อ 15.1' },
+    clauseSummary: 'ISO 9001: 8.5.4 | FAMI-QS: 8.6 | DLD GHPs: ข้อ 15.1',
+    questionTh: 'การจัดเรียงบนพาเลท การพันฟิล์มยืด (Stretch Film) และการติดป้าย Pallet Tag มีความแข็งแรง เรียบร้อย ป้องกันความเสียหายก่อนส่งมอบเข้าคลังสินค้าหรือไม่?',
+    evidenceExamples: ['สภาพพาเลทสินค้าสำเร็จรูปที่พันฟิล์มเรียบร้อย', 'ป้าย Pallet Tag ระบุชื่อสินค้า Lot จำนวนกล่อง ชัดเจน'],
     depthLevel: 'standard'
   },
 ];
@@ -582,12 +787,12 @@ export const INITIAL_ANNUAL_PLAN_ROWS: any[] = DEPARTMENTS_DATA.map((dept, idx) 
   return {
     departmentCode: dept.code,
     departmentName: dept.nameTh,
-    standardsClause: dept.code === 'PT' ? 'ISO: 8.5, FAMI: 8.4, GHPs: 8, 13' :
+    standardsClause: dept.code.startsWith('PT-') ? 'ISO: 8.5.1, FAMI: 8.4, GHPs: ข้อ 8, 13' :
                     dept.code === 'QA' ? 'ISO: 8.6, 8.7, FAMI: 8.5, 8.8' :
                     dept.code === 'QMR' ? 'ISO: 4-6, 9.3, FAMI: 4-6, 9.3' :
                     'ISO: 7, 8, FAMI: 7, 8, GHPs: ข้อ 7-15',
     months: monthsState,
-    remarks: idx % 3 === 0 ? 'ตรวจครบตามกำหนดรอบที่ 1' : 'แผนสอดคล้องกับรอบ FAMI-QS'
+    remarks: dept.code.startsWith('PT-') ? 'แผนตรวจประเมินแยกตามสายการผลิต' : (idx % 3 === 0 ? 'ตรวจครบตามกำหนดรอบที่ 1' : 'แผนสอดคล้องกับรอบ FAMI-QS')
   };
 });
 
@@ -629,20 +834,164 @@ export const INITIAL_SCHEDULES: any[] = [
     status: 'SCHEDULED'
   },
   {
-    id: 'sch-03',
+    id: 'sch-pt-01',
     cycle: '1/2569',
     date: '2026-11-12',
-    time: '09:00 - 12:00',
-    departmentCode: 'PT',
-    departmentName: 'ฝ่ายผลิตและไลน์ L1-L9 (PT)',
-    requirements: 'ISO 9001: 8.5.1, 8.7 | FAMI-QS: 8.4, 8.4.2, 8.4.3 | DLD HACCP: ข้อ 17-21',
+    time: '09:00 - 10:30',
+    departmentCode: 'PT-L1',
+    departmentName: 'ฝ่ายผลิต Line 1 (ยาน้ำ)',
+    requirements: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 8, 13',
     leadAuditorId: 'usr-21',
     leadAuditorName: 'คุณอิสรีย์ ฐิติโชติธนรัฐ',
-    auditeeId: 'usr-16',
-    auditeeName: 'น.ส.สาวนา มามุ',
+    auditeeId: 'usr-09',
+    auditeeName: 'นายจตุรวิทย์ ฝั้นปันวงค์',
+    leadAuditorAck: true,
+    leadAuditorAckDate: '2026-11-03 08:45',
+    auditeeAck: true,
+    auditeeAckDate: '2026-11-03 09:15',
+    status: 'SCHEDULED'
+  },
+  {
+    id: 'sch-pt-02',
+    cycle: '1/2569',
+    date: '2026-11-12',
+    time: '10:30 - 12:00',
+    departmentCode: 'PT-L2',
+    departmentName: 'ฝ่ายผลิต Line 2 (ยาผง)',
+    requirements: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 8, 13',
+    leadAuditorId: 'usr-21',
+    leadAuditorName: 'คุณอิสรีย์ ฐิติโชติธนรัฐ',
+    auditeeId: 'usr-10',
+    auditeeName: 'นายสุรชา ส่งคืน',
+    leadAuditorAck: true,
+    leadAuditorAckDate: '2026-11-03 08:45',
+    auditeeAck: true,
+    auditeeAckDate: '2026-11-03 09:30',
+    status: 'SCHEDULED'
+  },
+  {
+    id: 'sch-pt-03',
+    cycle: '1/2569',
+    date: '2026-11-12',
+    time: '13:00 - 14:30',
+    departmentCode: 'PT-L3',
+    departmentName: 'ฝ่ายผลิต Line 3 (สารผสมล่วงหน้า/Premix)',
+    requirements: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4.2 (Homogeneity), 8.4.3 (Carry-over) | DLD GHPs',
+    leadAuditorId: 'usr-21',
+    leadAuditorName: 'คุณอิสรีย์ ฐิติโชติธนรัฐ',
+    auditeeId: 'usr-11',
+    auditeeName: 'นายภราดร ขาวเจริญ',
     leadAuditorAck: true,
     leadAuditorAckDate: '2026-11-03 08:45',
     auditeeAck: false,
+    status: 'SCHEDULED'
+  },
+  {
+    id: 'sch-pt-04',
+    cycle: '1/2569',
+    date: '2026-11-13',
+    time: '09:00 - 10:30',
+    departmentCode: 'PT-L4',
+    departmentName: 'ฝ่ายผลิต Line 4 (ยาเม็ด)',
+    requirements: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 8, 13',
+    leadAuditorId: 'usr-04',
+    leadAuditorName: 'นายนิวัฒน์ เง็กทองดี',
+    auditeeId: 'usr-12',
+    auditeeName: 'นายอภิเษก สุขประมูล',
+    leadAuditorAck: true,
+    leadAuditorAckDate: '2026-11-03 10:00',
+    auditeeAck: true,
+    auditeeAckDate: '2026-11-03 11:15',
+    status: 'SCHEDULED'
+  },
+  {
+    id: 'sch-pt-05',
+    cycle: '1/2569',
+    date: '2026-11-13',
+    time: '10:30 - 12:00',
+    departmentCode: 'PT-L5',
+    departmentName: 'ฝ่ายผลิต Line 5 (แชมพู/สเปรย์)',
+    requirements: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 8, 13',
+    leadAuditorId: 'usr-04',
+    leadAuditorName: 'นายนิวัฒน์ เง็กทองดี',
+    auditeeId: 'usr-13',
+    auditeeName: 'นายพัฒนพงศ์ เจียรจิรพงศ์',
+    leadAuditorAck: true,
+    leadAuditorAckDate: '2026-11-03 10:00',
+    auditeeAck: true,
+    auditeeAckDate: '2026-11-03 11:30',
+    status: 'SCHEDULED'
+  },
+  {
+    id: 'sch-pt-06',
+    cycle: '1/2569',
+    date: '2026-11-13',
+    time: '13:00 - 14:30',
+    departmentCode: 'PT-L6',
+    departmentName: 'ฝ่ายผลิต Line 6 (อาหารเสริมสัตว์เลี้ยง)',
+    requirements: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD HACCP: ข้อ 17-20',
+    leadAuditorId: 'usr-04',
+    leadAuditorName: 'นายนิวัฒน์ เง็กทองดี',
+    auditeeId: 'usr-14',
+    auditeeName: 'น.ส.ชญาดา วิโชติโภคิน',
+    leadAuditorAck: true,
+    leadAuditorAckDate: '2026-11-03 10:00',
+    auditeeAck: true,
+    auditeeAckDate: '2026-11-03 14:00',
+    status: 'SCHEDULED'
+  },
+  {
+    id: 'sch-pt-07',
+    cycle: '1/2569',
+    date: '2026-11-14',
+    time: '09:00 - 10:30',
+    departmentCode: 'PT-L7',
+    departmentName: 'ฝ่ายผลิต Line 7 (โภชนเภสัช)',
+    requirements: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 8, 13',
+    leadAuditorId: 'usr-admin',
+    leadAuditorName: 'คุณวรภณ พ. (ผู้ดูแลระบบกลาง)',
+    auditeeId: 'usr-15',
+    auditeeName: 'นายสัจจา สมานมิตร',
+    leadAuditorAck: true,
+    leadAuditorAckDate: '2026-11-04 08:30',
+    auditeeAck: true,
+    auditeeAckDate: '2026-11-04 09:20',
+    status: 'SCHEDULED'
+  },
+  {
+    id: 'sch-pt-08',
+    cycle: '1/2569',
+    date: '2026-11-14',
+    time: '10:30 - 12:00',
+    departmentCode: 'PT-L8',
+    departmentName: 'ฝ่ายผลิต Line 8 (Pet Food)',
+    requirements: 'ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD HACCP: ข้อ 17-21',
+    leadAuditorId: 'usr-admin',
+    leadAuditorName: 'คุณวรภณ พ. (ผู้ดูแลระบบกลาง)',
+    auditeeId: 'usr-16',
+    auditeeName: 'น.ส.สาวนา มามุ',
+    leadAuditorAck: true,
+    leadAuditorAckDate: '2026-11-04 08:30',
+    auditeeAck: true,
+    auditeeAckDate: '2026-11-04 10:00',
+    status: 'SCHEDULED'
+  },
+  {
+    id: 'sch-pt-09',
+    cycle: '1/2569',
+    date: '2026-11-14',
+    time: '13:00 - 14:30',
+    departmentCode: 'PT-L9',
+    departmentName: 'ฝ่ายผลิต Line 9 (บรรจุเสร็จ)',
+    requirements: 'ISO 9001: 8.5.1, 8.5.4 | FAMI-QS: 8.4, 8.6 | DLD GHPs: ข้อ 13',
+    leadAuditorId: 'usr-admin',
+    leadAuditorName: 'คุณวรภณ พ. (ผู้ดูแลระบบกลาง)',
+    auditeeId: 'usr-17',
+    auditeeName: 'นายตันติกร พิทักษ์สกุล',
+    leadAuditorAck: true,
+    leadAuditorAckDate: '2026-11-04 08:30',
+    auditeeAck: true,
+    auditeeAckDate: '2026-11-04 13:30',
     status: 'SCHEDULED'
   },
   {
@@ -803,9 +1152,9 @@ export const INITIAL_NOTIFICATIONS: any[] = [
 
 export const INITIAL_APP_STATE: AppState = {
   users: USERS_DATA,
-  currentUser: USERS_DATA[0], // wrpn2535@gmail.com
-  isAuthenticated: true,
-  loginTimestamp: '2026-11-05 08:30',
+  currentUser: USERS_DATA[0], // default profile placeholder
+  isAuthenticated: false,
+  loginTimestamp: undefined,
   departments: DEPARTMENTS_DATA,
   checklistBank: CHECKLIST_BANK_DATA,
   annualPlanHeader: {

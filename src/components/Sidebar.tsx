@@ -80,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       id: 'checklist',
       label: 'Checklist ตรวจประเมิน',
-      subLabel: 'FM-QM-014 Rev.08/07',
+      subLabel: 'FM-QM-014 Rev.08',
       icon: <ClipboardCheck className="w-4 h-4" />,
     },
     {

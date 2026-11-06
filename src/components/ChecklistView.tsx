@@ -18,7 +18,11 @@ import {
   XCircle,
   AlertOctagon,
   Eye,
-  FileText
+  FileText,
+  Edit3,
+  Plus,
+  Trash2,
+  X
 } from 'lucide-react';
 import {
   AppState,
@@ -26,7 +30,8 @@ import {
   ChecklistAssessmentRecord,
   StandardType,
   UserProfile,
-  AuditScheduleItem
+  AuditScheduleItem,
+  ChecklistItem
 } from '../types';
 import { ApiService } from '../services/api';
 import { SignaturePad } from './SignaturePad';
@@ -69,7 +74,8 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
     'GHPs/HACCP',
     'FAMI-QS'
   ]);
-  const [activeFormRev, setActiveFormRev] = useState<'Rev.08' | 'Rev.07'>('Rev.08');
+  const activeFormRev = 'Rev.08';
+  const canManageQuestions = ['ADMIN', 'QMR', 'LEAD_AUDITOR', 'AUDITOR'].includes(currentUser.role);
 
   // Items state
   const [items, setItems] = useState<
@@ -82,6 +88,17 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
   const [qmrSig, setQmrSig] = useState<{ name: string; date: string; dataUrl?: string } | undefined>();
 
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
+
+  // Question Management Modal State (Admin / Lead Auditor / Auditor)
+  const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
+  const [draftItemCode, setDraftItemCode] = useState('');
+  const [draftClauseSummary, setDraftClauseSummary] = useState('');
+  const [draftQuestionTh, setDraftQuestionTh] = useState('');
+  const [draftEvidence, setDraftEvidence] = useState('');
+  const [draftDepthLevel, setDraftDepthLevel] = useState<'standard' | 'deep_dive'>('standard');
+  const [questionFeedback, setQuestionFeedback] = useState<string | null>(null);
 
   // When selectedDeptCode changes or schedule changes, load questions for that department
   useEffect(() => {
@@ -152,6 +169,110 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
     setItems(updated);
   };
 
+  // Open modal to add a new question
+  const handleOpenAddQuestion = () => {
+    setEditingQuestionId(null);
+    setEditingItemIndex(null);
+    const nextNum = items.length + 1;
+    const formattedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
+    setDraftItemCode(`${selectedDeptCode}-${formattedNum}`);
+    setDraftClauseSummary('ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 13');
+    setDraftQuestionTh('');
+    setDraftEvidence('');
+    setDraftDepthLevel('standard');
+    setQuestionFeedback(null);
+    setIsQuestionModalOpen(true);
+  };
+
+  // Open modal to edit existing question
+  const handleOpenEditQuestion = (item: ChecklistAssessmentRecord['items'][0], index: number) => {
+    setEditingQuestionId(item.checklistItemId || null);
+    setEditingItemIndex(index);
+    setDraftItemCode(item.itemCode);
+    setDraftClauseSummary(item.clause);
+    setDraftQuestionTh(item.question);
+    setDraftEvidence(item.remarks ? item.remarks.split(' • ').join('\n') : '');
+    const bankItem = state.checklistBank.find(b => b.id === item.checklistItemId || b.itemCode === item.itemCode);
+    setDraftDepthLevel(bankItem?.depthLevel || 'standard');
+    setQuestionFeedback(null);
+    setIsQuestionModalOpen(true);
+  };
+
+  // Save question (Add or Edit)
+  const handleSaveQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!draftQuestionTh.trim() || !draftItemCode.trim()) return;
+
+    const evidenceList = draftEvidence.split('\n').map(s => s.trim()).filter(Boolean);
+    const qId = editingQuestionId || `chk-${selectedDeptCode.toLowerCase()}-${Date.now().toString().slice(-6)}`;
+
+    const checklistItem: ChecklistItem = {
+      id: qId,
+      departmentCode: selectedDeptCode,
+      itemCode: draftItemCode.trim(),
+      clauses: {
+        iso9001: '',
+        famiQs: '',
+        dldGhpsHaccp: ''
+      },
+      clauseSummary: draftClauseSummary.trim() || 'ข้อกำหนดคุณภาพและความปลอดภัย',
+      questionTh: draftQuestionTh.trim(),
+      evidenceExamples: evidenceList.length > 0 ? evidenceList : ['เอกสารขั้นตอนการปฏิบัติงานและบันทึกหน้างาน'],
+      depthLevel: draftDepthLevel
+    };
+
+    await ApiService.saveChecklistItem(checklistItem);
+
+    // Update in-memory items in current assessment
+    if (editingItemIndex !== null && editingItemIndex >= 0 && editingItemIndex < items.length) {
+      const updated = [...items];
+      updated[editingItemIndex] = {
+        ...updated[editingItemIndex],
+        itemCode: checklistItem.itemCode,
+        clause: checklistItem.clauseSummary,
+        question: checklistItem.questionTh,
+        remarks: checklistItem.evidenceExamples.join(' • ')
+      };
+      setItems(updated);
+    } else {
+      // New item added to current assessment
+      const newItem = {
+        checklistItemId: checklistItem.id,
+        itemCode: checklistItem.itemCode,
+        clause: checklistItem.clauseSummary,
+        question: checklistItem.questionTh,
+        rating: 'UNRATED' as AuditRating,
+        findings: '',
+        remarks: checklistItem.evidenceExamples.join(' • '),
+        linkedCapaId: undefined
+      };
+      setItems([...items, newItem]);
+    }
+
+    setQuestionFeedback(editingQuestionId ? 'บันทึกการแก้ไขคำถามสำเร็จแล้ว' : 'เพิ่มข้อคำถามใหม่เรียบร้อยแล้ว');
+    setTimeout(() => {
+      setQuestionFeedback(null);
+      setIsQuestionModalOpen(false);
+    }, 1000);
+  };
+
+  // Delete question
+  const handleDeleteQuestion = async () => {
+    if (!editingQuestionId && editingItemIndex === null) return;
+    if (!window.confirm('คุณต้องการลบข้อคำถามนี้ออกจาก Checklist ใช่หรือไม่?')) return;
+
+    if (editingQuestionId) {
+      await ApiService.deleteChecklistItem(editingQuestionId);
+    }
+
+    if (editingItemIndex !== null) {
+      const updated = items.filter((_, idx) => idx !== editingItemIndex);
+      setItems(updated);
+    }
+
+    setIsQuestionModalOpen(false);
+  };
+
   const handleSaveAssessment = async () => {
     const assessmentId = `assess-${selectedDeptCode}-${auditCycle.replace('/', '-')}`;
     const record: ChecklistAssessmentRecord = {
@@ -218,12 +339,15 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <button
-            onClick={() => setActiveFormRev(activeFormRev === 'Rev.08' ? 'Rev.07' : 'Rev.08')}
-            className="px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            สลับเวอร์ชัน ({activeFormRev})
-          </button>
+          {canManageQuestions && (
+            <button
+              onClick={handleOpenAddQuestion}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-sm transition-colors cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              + เพิ่มคำถามตรวจประเมิน
+            </button>
+          )}
 
           <button
             onClick={handleSaveAssessment}
@@ -428,6 +552,17 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2">
+                    {canManageQuestions && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditQuestion(item, idx)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 rounded-lg transition-colors cursor-pointer mr-1 shadow-2xs"
+                        title="แก้ไขข้อคำถามและหลักฐาน"
+                      >
+                        <Edit3 className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                        <span>แก้ไขคำถาม</span>
+                      </button>
+                    )}
                     {/* Status Badge */}
                     {item.rating === 'C' && (
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
@@ -726,6 +861,154 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Add / Edit Question Modal (Admin / Lead Auditor / Auditor) */}
+      {isQuestionModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 flex items-center justify-center">
+                  <Edit3 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    {editingQuestionId ? 'แก้ไขข้อคำถามตรวจประเมิน' : 'เพิ่มข้อคำถามตรวจประเมินใหม่'}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    ฝ่าย/แผนก: {selectedDeptCode} ({currentDept?.nameTh}) • FM-QM-014 {activeFormRev}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsQuestionModalOpen(false)}
+                className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSaveQuestion} className="p-5 overflow-y-auto space-y-4 text-xs">
+              {questionFeedback && (
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-xl flex items-center gap-2 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>{questionFeedback}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    รหัสข้อคำถาม (Item Code) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={draftItemCode}
+                    onChange={(e) => setDraftItemCode(e.target.value)}
+                    placeholder="เช่น PT-L1-01, QMR-06"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    ระดับการตรวจ (Audit Depth)
+                  </label>
+                  <select
+                    value={draftDepthLevel}
+                    onChange={(e) => setDraftDepthLevel(e.target.value as 'standard' | 'deep_dive')}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  >
+                    <option value="standard">Standard Audit (ตรวจประเมินทั่วไปตามรอบ)</option>
+                    <option value="deep_dive">Deep Dive / High Risk (จุดตรวจเจาะลึกความเสี่ยงสูง)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  ข้อกำหนดและมาตรฐานที่อ้างอิง (Clauses & Standards) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={draftClauseSummary}
+                  onChange={(e) => setDraftClauseSummary(e.target.value)}
+                  placeholder="เช่น ISO 9001: 8.5.1 | FAMI-QS: 8.4 | DLD GHPs: ข้อ 13"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  ข้อคำถามการตรวจประเมิน (Audit Question) *
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={draftQuestionTh}
+                  onChange={(e) => setDraftQuestionTh(e.target.value)}
+                  placeholder="ระบุคำถามตรวจประเมินให้ชัดเจน ครอบคลุมขั้นตอนการทำงาน การควบคุม หรือเกณฑ์ที่ต้องตรวจสอบ..."
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none leading-relaxed"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  แนวทาง & ตัวอย่างหลักฐานเชิงประจักษ์ที่ต้องขอดู (Objective Evidence - ใส่บรรทัดละ 1 รายการ)
+                </label>
+                <textarea
+                  rows={3}
+                  value={draftEvidence}
+                  onChange={(e) => setDraftEvidence(e.target.value)}
+                  placeholder="เช่น:
+บันทึกการควบคุมกระบวนการผลิตประจำวัน (Production Batch Record)
+ใบรับรองการสอบเทียบเครื่องมือวัดที่ยังไม่หมดอายุ
+รายงานผลการทดสอบการล้างทำความสะอาด (CIP Log)"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none leading-relaxed placeholder:text-slate-400 font-sans"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+                {editingQuestionId || editingItemIndex !== null ? (
+                  <button
+                    type="button"
+                    onClick={handleDeleteQuestion}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    ลบคำถามนี้
+                  </button>
+                ) : (
+                  <div></div>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsQuestionModalOpen(false)}
+                    className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-xl shadow-sm transition-all cursor-pointer"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    บันทึกข้อคำถาม
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,0 +1,6 @@
+{
+  "summary": "แผนการปรับปรุงระบบความปลอดภัยการเข้าสู่ระบบ: บังคับยืนยันอีเมลผ่าน Google Authentication เสมอ ตรวจสอบสถานะ email_verified จาก Firebase Auth และยกเลิกปุ่มเข้าสู่ระบบด่วน (Quick Login) ทั้งหมดเพื่อป้องกันการข้ามขั้นตอนการระบุตัวตน",
+  "updatedAt": "2026-11-06T04:56:22.497378107Z",
+  "requestFeedback": true,
+  "userFacing": true
+}
